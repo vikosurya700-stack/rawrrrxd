@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Selamat Ulang Tahun!</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <style>
+    canvas#fireworks {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Efek glitter pada teks */
+    .glitter {
+      background: linear-gradient(90deg, #ff69b4, #ffcc00, #ff69b4, #ffcc00);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glitter 3s infinite linear;
+    }
+
+    @keyframes glitter {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-r from-pink-200 via-purple-200 to-blue-200 min-h-screen flex flex-col items-center justify-center text-center p-6 overflow-hidden relative">
+  <canvas id="fireworks"></canvas>
+
+  <h1 id="mainTitle" class="relative z-10 text-5xl font-extrabold text-purple-700 drop-shadow-lg mb-4 animate-bounce">🎉 Selamat Ulang Tahun Sayangkuu! 🎂</h1>
+  <p class="relative z-10 text-lg text-gray-700 mb-6">Semoga panjang umur, sehat selalu, dan sukses selalu!. aku ga bisa berkata kata pokok lopyuuuuuu 🌟</p>
+
+  <!-- Hitung Mundur -->
+  <div class="relative z-10 text-2xl font-bold text-gray-800 mb-6">
+    Waktu menuju ulang tahun: <span id="countdown" class="text-pink-600"></span>
+  </div>
+
+  <!-- Tombol untuk menyalakan confetti -->
+  <button onclick="partyTime()" class="relative z-10 px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white rounded-2xl shadow-lg transition-transform transform hover:scale-110">
+    🎊 Rayakan Sekarang 🎊
+  </button>
+
+  <!-- Foto otomatis -->
+  <div class="relative z-10 mb-6">
+    <img id="photoDisplay" 
+         src="https://share.google/images/rwcf4J4n3AgXYk56o" 
+         alt="Foto Ulang Tahun" 
+         class="mx-auto w-48 h-48 object-cover rounded-2xl shadow-lg border-4 border-pink-400 opacity-0 scale-75"/>
+  </div>
+
+  <!-- Gambar kue ulang tahun -->
+  <div class="relative z-10 mt-4">
+    <img src="https://cdn-icons-png.flaticon.com/512/1997/1997928.png" alt="Birthday Cake" class="w-40 mx-auto animate-pulse">
+  </div>
+
+  <!-- Ucapan spesial -->
+  <h2 id="specialMessage" class="relative z-10 hidden text-4xl font-bold mt-6 opacity-0 glitter">💖 Selamat Ulang Tahun, Semoga Bahagia Selalu! 💖</h2>
+
+  <!-- Balon -->
+  <div id="balloons" class="absolute bottom-0 left-0 w-full h-full pointer-events-none z-10"></div>
+
+  <!-- Musik & Efek Suara -->
+  <audio id="birthdaySong" src="https://www2.cs.uic.edu/~i101/SoundFiles/HappyBirthdaySong.mp3"></audio>
+  <audio id="fireworkSound" src="https://www.soundjay.com/explosion/sounds/fireworks-1.mp3"></audio>
+  <audio id="popSound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3"></audio>
+
+  <script>
+    function playSound(id) {
+      const sound = document.getElementById(id);
+      if (sound) {
+        sound.currentTime = 0;
+        sound.play();
+      }
+    }
+
+    function partyTime() {
+      confetti({
+        particleCount: 200,
+        spread: 100,
+        origin: { y: 0.6 }
+      });
+      document.getElementById("birthdaySong").play();
+      playSound("fireworkSound");
+    }
+
+    function showMessage() {
+      const msg = document.getElementById("specialMessage");
+      msg.classList.remove("hidden");
+      gsap.to(msg, { opacity: 1, scale: 1.2, duration: 1.5, ease: "bounce.out" });
+    }
+
+    function releaseBalloons() {
+      const container = document.getElementById("balloons");
+      const interval = setInterval(() => {
+        for (let i = 0; i < 5; i++) {
+          const balloon = document.createElement("div");
+          balloon.innerHTML = "🎈";
+          balloon.style.position = "absolute";
+          balloon.style.left = Math.random() * 90 + "%";
+          balloon.style.bottom = "-50px";
+          balloon.style.fontSize = Math.random() * 30 + 30 + "px";
+          container.appendChild(balloon);
+
+          gsap.to(balloon, {
+            y: -window.innerHeight - 200,
+            duration: Math.random() * 5 + 5,
+            delay: Math.random() * 2,
+            ease: "power1.out",
+            onComplete: () => {
+              balloon.remove();
+              playSound("popSound");
+            }
+          });
+        }
+      }, 800);
+
+      // Hentikan balon setelah 15 detik
+      setTimeout(() => clearInterval(interval), 15000);
+    }
+
+    // Efek Kembang Api
+    function fireworksEffect() {
+      const canvas = document.getElementById("fireworks");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      let particles = [];
+
+      function random(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function createFirework(x, y) {
+        const count = 100;
+        playSound("fireworkSound");
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: x,
+            y: y,
+            radius: 2,
+            color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+            vx: random(-5, 5),
+            vy: random(-5, 5),
+            life: 100
+          });
+        }
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach((p, i) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life--;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+          if (p.life <= 0) particles.splice(i, 1);
+        });
+        requestAnimationFrame(animate);
+      }
+
+      setInterval(() => {
+        createFirework(random(100, canvas.width - 100), random(100, canvas.height / 2));
+      }, 1500);
+
+      animate();
+    }
+
+    // Animasi foto saat halaman dimuat
+    window.addEventListener("load", () => {
+      gsap.to("#photoDisplay", {
+        opacity: 1,
+        scale: 1,
+        duration: 2,
+        ease: "elastic.out(1, 0.5)"
+      });
+    });
+
+    // Hitung mundur 1 menit dari sekarang
+    const targetDate = new Date().getTime() + 10000; // 60.000 ms = 1 menit
+
+    const countdownFunction = setInterval(() => {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      const seconds = Math.floor(distance / 1000);
+
+      document.getElementById("countdown").innerHTML = `${seconds} detik`;
+
+      if (distance < 0) {
+        clearInterval(countdownFunction);
+        document.getElementById("countdown").innerHTML = "Hari ini! 🎉";
+        partyTime(); // otomatis rayakan + putar musik saat waktunya tiba
+        showMessage(); // tampilkan pesan animasi
+        releaseBalloons(); // lepaskan balon
+        fireworksEffect(); // aktifkan kembang api
+      }
+    }, 1000);
+  </script>
+</body>
+</html>
